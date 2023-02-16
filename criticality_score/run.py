@@ -494,12 +494,14 @@ def get_repository_score(repo_stats, additional_params=None):
         additional_params_score += get_param_score(value, max_threshold,
                                                    weight)
 
-    total_weight = (CREATED_SINCE_WEIGHT + UPDATED_SINCE_WEIGHT +
-                    CONTRIBUTOR_COUNT_WEIGHT + ORG_COUNT_WEIGHT +
-                    COMMIT_FREQUENCY_WEIGHT + RECENT_RELEASES_WEIGHT +
-                    CLOSED_ISSUES_WEIGHT + UPDATED_ISSUES_WEIGHT +
-                    COMMENT_FREQUENCY_WEIGHT + DEPENDENTS_COUNT_WEIGHT +
-                    additional_params_total_weight)
+    weights = (CREATED_SINCE_WEIGHT, UPDATED_SINCE_WEIGHT,
+    CONTRIBUTOR_COUNT_WEIGHT, ORG_COUNT_WEIGHT, COMMIT_FREQUENCY_WEIGHT,
+    RECENT_RELEASES_WEIGHT, CLOSED_ISSUES_WEIGHT, UPDATED_ISSUES_WEIGHT,
+    COMMENT_FREQUENCY_WEIGHT, DEPENDENTS_COUNT_WEIGHT,
+    additional_params_total_weight)
+
+    # Take into account negative weight
+    totol_weight = sum([matgh.abs(w) for w in weights])
 
     criticality_score = round(
         ((get_param_score(float(repo_stats['created_since']),
@@ -524,9 +526,6 @@ def get_repository_score(repo_stats, additional_params=None):
              DEPENDENTS_COUNT_THRESHOLD, DEPENDENTS_COUNT_WEIGHT)) +
          additional_params_score) /
         total_weight, 5)
-
-    # Make sure score between 0 (least-critical) and 1 (most-critical).
-    criticality_score = max(min(criticality_score, 1), 0)
 
     return criticality_score
 
